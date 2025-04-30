@@ -1,0 +1,6 @@
+verilog xil_defaultlib  \
+"../../../../lab6_1_new.gen/sources_1/ip/dead_rom_1/sim/dead_rom.v" \
+
+verilog xil_defaultlib "glbl.v"
+
+nosort

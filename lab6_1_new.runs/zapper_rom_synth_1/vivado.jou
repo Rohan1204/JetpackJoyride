@@ -1,0 +1,13 @@
+#-----------------------------------------------------------
+# Vivado v2022.2 (64-bit)
+# SW Build 3671981 on Fri Oct 14 05:00:03 MDT 2022
+# IP Build 3669848 on Fri Oct 14 08:30:02 MDT 2022
+# Start of session at: Tue Apr 29 14:33:24 2025
+# Process ID: 50908
+# Current directory: C:/Users/RohanS/Desktop/lab6_1_new/lab6_1_new.runs/zapper_rom_synth_1
+# Command line: vivado.exe -log zapper_rom.vds -product Vivado -mode batch -messageDb vivado.pb -notrace -source zapper_rom.tcl
+# Log file: C:/Users/RohanS/Desktop/lab6_1_new/lab6_1_new.runs/zapper_rom_synth_1/zapper_rom.vds
+# Journal file: C:/Users/RohanS/Desktop/lab6_1_new/lab6_1_new.runs/zapper_rom_synth_1\vivado.jou
+# Running On: DESKTOP-T61EB0F, OS: Windows, CPU Frequency: 2112 MHz, CPU Physical cores: 4, Host memory: 34211 MB
+#-----------------------------------------------------------
+source zapper_rom.tcl -notrace
