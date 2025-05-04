@@ -13,14 +13,12 @@ logic [3:0] palette_red, palette_green, palette_blue;
 
 logic negedge_vga_clk;
 
-// read from ROM on negedge, set pixel on posedge
 assign negedge_vga_clk = ~vga_clk;
 
-// address into the rom = (x*xDim)/640 + ((y*yDim)/480) * xDim
-// this will stretch out the sprite across the entire screen
+//we get the rom address and then utilize it to map the full screen of our sprite
 assign rom_address = (DrawX >> 2) + ((DrawY >> 2) * 160);
 
-
+//same as others - if this logic is on then show the screen as dead
 always_ff @ (posedge vga_clk) begin
 	if (dead && blank) begin
 		red <= palette_red;

@@ -13,13 +13,11 @@ logic [3:0] palette_red, palette_green, palette_blue;
 
 logic negedge_vga_clk;
 
-// read from ROM on negedge, set pixel on posedge
 assign negedge_vga_clk = ~vga_clk;
 
-// address into the rom = (x*xDim)/640 + ((y*yDim)/480) * xDim
-// this will stretch out the sprite across the entire screen
-assign rom_address = (DrawX >> 2) + ((DrawY >> 2) * 160);
 
+assign rom_address = (DrawX >> 2) + ((DrawY >> 2) * 160);
+//same logic as dead screen - just show the screen INITALly this time and the move forward based on keycodes
 always_ff @ (posedge vga_clk) begin
 	if (loading_screen && blank) begin
 		red <= palette_red;

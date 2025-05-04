@@ -4,15 +4,14 @@ module movement_timer (
     output logic move_enable,
     output logic [23:0] counter_out
 );
-    localparam MAX_COUNT = 1_666_666;
 
-    logic [23:0] counter = 0;
+    logic [23:0] counter = 5;   //WAS 0
 
     always_ff @(posedge clk) begin
-    if(reset) counter <= 0;
+    if(reset) counter <= 3'd5;  //WAS 0
     else begin
-        counter <= counter + 1;
-        move_enable <= (counter % MAX_COUNT) == 0;  // No reset
+        counter <= counter + 1; //decreasing value below increases speed
+        move_enable <= (counter % 24'd800_000) == 0;  // No reset
         counter_out <= counter;
     end
     end

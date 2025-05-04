@@ -5,7 +5,7 @@ module control_unit (
     input  logic [9:0]  ZapperX, ZapperY,
     input  logic [9:0]  zap2x, zap2y,
     input  logic [9:0]  spritex, spritey,
-    input  logic [9:0]  BallX, BallY,
+    input  logic [9:0]  BallX, BallY, misx, misy,
     output logic        player_dead,
     output logic        loading_screen,
     output logic        in_game
@@ -19,15 +19,7 @@ module control_unit (
 
     state_t current_state, next_state;
 
-    // Size Constants
-    localparam logic [9:0] ZAPPER_WIDTH  = 10'd43;
-    localparam logic [9:0] ZAPPER_HEIGHT = 10'd96;
-    localparam logic [9:0] ZAPPER2_WIDTH  = 10'd70;
-    localparam logic [9:0] ZAPPER2_HEIGHT = 10'd172;
-    localparam logic [9:0] BARRY_WIDTH   = 10'd50;
-    localparam logic [9:0] BARRY_HEIGHT  = 10'd45;  //BARRY IS A RECTANGLE NOW
-
-    // Update current state
+//followed state diagram from before - make states
     always_ff @(posedge clk or posedge reset) begin
         if (reset)
             current_state <= LOADING;
@@ -40,31 +32,36 @@ module control_unit (
         loading_screen = 1'b0;
         in_game        = 1'b0;
         player_dead    = 1'b0;
-
+//initalize everyting to 0 if not used 
         case (current_state)
-            LOADING: loading_screen = 1'b1;
-            GAME:    in_game        = 1'b1;
-            DEAD:    player_dead    = 1'b1;
+            LOADING: 
+                loading_screen = 1'b1; //set respective values to 1 when needed
+            GAME:    
+                in_game        = 1'b1;
+            DEAD:    
+                player_dead    = 1'b1;
         endcase
     end
 
-    // Next state logic
+    // Next state logic - we set the next states based on condition - includes bound checkign and colluision detection - roahn
     always_comb begin
         next_state = current_state;
 
         case (current_state)
             LOADING: begin
-                if (keycode == 8'h1A)
+                if (keycode == 8'h1A) //if we press W then we are in the next game from the loading screen
                     next_state = GAME;
             end
 
     GAME: begin
-        if ((
-            (BallX + BARRY_WIDTH > ZapperX) && (BallX < ZapperX + ZAPPER_WIDTH) &&
-            (BallY + BARRY_HEIGHT > ZapperY) && (BallY < ZapperY + ZAPPER_HEIGHT))
-        ||  ((BallX + BARRY_WIDTH > zap2x) && (BallX < zap2x + ZAPPER2_WIDTH) &&
-            (BallY + BARRY_HEIGHT > zap2y) && (BallY < zap2y + ZAPPER2_HEIGHT))
-        )
+        if (( //barry height and width are both 40 - made a bit smaller for a better hit box
+            (BallX + 10'd40 > ZapperX) && (BallX < ZapperX + 10'd31) && //zapper width 1
+            (BallY + 10'd40 > ZapperY) && (BallY < ZapperY + 10'd96)) //zapper height 1
+        ||  ((BallX + 10'd40 > zap2x) && (BallX < zap2x + 10'd55) && //zapper wifth 2
+            (BallY + 10'd40 > zap2y) && (BallY < zap2y + 10'd172)) ||  //.zapper height 2
+            ((BallX + 10'd40 > misx) && (BallX < misx + 5'd20) && //misisle width
+            (BallY + 10'd40 > misy) && (BallY < misy + 5'd20)) //missile height
+                    ) //bounds and collision detection for all the modules, the missles, zapper etc....
         begin
             next_state = DEAD;
             end
@@ -72,8 +69,10 @@ module control_unit (
             DEAD: begin
                 if (reset)
                     next_state = LOADING;
-                else if (keycode == 8'h15)
-                    next_state = LOADING;
+                else if (keycode == 8'h15) 
+                    next_state = LOADING; //if you press R then you are at the loading screen
+                else if (keycode == 8'h17)
+                    next_state = GAME; //if u press T then you are back in Game
             end
         endcase
     end

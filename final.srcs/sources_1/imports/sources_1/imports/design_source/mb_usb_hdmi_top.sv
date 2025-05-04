@@ -1,4 +1,3 @@
-
 module mb_usb_hdmi_top(
     input logic Clk,
     input logic reset_rtl_0,
@@ -134,17 +133,18 @@ module mb_usb_hdmi_top(
     logic dead_signal;
     logic [3:0] zap_r, zap_g, zap_b;
 //    logic [3:0] zap_r2, zap_g2, zap_b2;
-
+    logic [3:0] firer, fireg, fireb;
     logic zapper_on;
     logic [9:0] zapx, zapy;
-    logic [3:0] dr, dg, db;
+    logic [3:0] dr, dg, db, mr, mg, mb;
     logic [9:0] barryx, barryy;
-    
+    logic [9:0] misx, misy;
     //----added 4/30 8pm
         logic [3:0] zap2r, zap2g, zap2b;
         logic [9:0] zap2x, zap2y;
         logic zapper_on2;
-    
+        logic missile_out;
+        
         barry_example barry_example_inst (
         .vga_clk(clk_25MHz),
         .DrawX(drawX),
@@ -178,7 +178,15 @@ module mb_usb_hdmi_top(
         .zap2r(zap2r), 
         .zap2g(zap2g),
         .zap2b(zap2b),
-	    .zapper_on2(zapper_on2)
+	    .zapper_on2(zapper_on2),
+	    .keycode(keycode0_gpio[7:0]),
+	    .firer(firer),
+	    .fireg(fireg),
+	    .fireb(fireb),
+	    .missile(missile_out),
+	    .mr(mr),
+	    .mg(mg),
+	    .mb(mb)
     );
     
     loadingscreen_example loading (
@@ -240,10 +248,11 @@ module mb_usb_hdmi_top(
           zapper_control2 zapper_controller_inst2 (
           .clk(clk_25MHz),
           .reset(reset_ah),       //CHECK WHETHER RESET AH OR RESET
-          .move_enable(move_enable),
+          .move_enable( in_game && move_enable),
           .counter(shifted_counter),
           .zap2x(zap2x),
-          .zap2y(zap2y)
+          .zap2y(zap2y),
+          .in_game(in_game)
                 );
     //-------------------------------------------------------------
       control_unit control (
@@ -260,12 +269,14 @@ module mb_usb_hdmi_top(
             .BallX(ballxsig),
             .BallY(ballysig),
             .spritex(barryx), 
-            .spritey(barryy)
+            .spritey(barryy),
+            .misx(misx),
+            .misy(misy)
             );
             
             
         movement_timer zap_movement_timer (
-            .clk(Clk),            // Use 100MHz clock
+            .clk(clk_25MHz),            // Use 100MHz clock
             .move_enable(move_enable),
             .counter_out(movement_counter),
             .reset(reset_ah)
@@ -274,11 +285,52 @@ module mb_usb_hdmi_top(
         zapper_controller zapper_controller_inst (
             .clk(clk_25MHz),
             .reset(reset_ah),       //CHECK WHETHER RESET AH OR RESET
-            .move_enable(move_enable),
+            .move_enable( in_game && move_enable),
             .counter(movement_counter),
             .ZapperX(zapx),
-            .ZapperY(zapy)
-            
+            .ZapperY(zapy),
+            .in_game(in_game)
+
                 );
+
+
+            rohanflying_example barryfire (
+                .vga_clk(clk_25MHz),
+                .DrawX(drawX),
+                .DrawY(drawY),
+                .sprite_x(ballxsig),
+                .sprite_y(ballysig),
+                .blank(vde),
+                .red(firer),
+                .blue(fireb),
+                .green(fireg)
+                );
+                
+
+missile_control miss(
+        .clk(clk_25MHz),
+        .reset(reset_ah),
+        .move_enable(in_game && move_enable),
+        .counter(movement_counter),
+        .barry_y(ballysig),
+        .misx(misx),
+        .misy(misy),
+        .missile(missile_out),
+        .in_game(in_game)
+        );
+        
+ missile_example missilerender (   
+            .vga_clk(clk_25MHz),
+            .DrawX(drawX), 
+            .DrawY(drawY),
+            .blank(vde),
+            .sprite_x(misx), 
+            .sprite_y(misy),  
+            .missile(missile_out),             
+            .red(mr), 
+            .green(mg), 
+            .blue(mb)
+);
+        
 
 endmodule

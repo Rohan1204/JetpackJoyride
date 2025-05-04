@@ -10,19 +10,18 @@ module bg_example (
     logic [3:0] palette_red, palette_green, palette_blue;
 
     assign rom_address = DrawX + (DrawY * 640);
-
-    // Output color from palette
+    //same format as befor e- caluclate ROm address and then map to rom to get colors
     always_ff @(posedge vga_clk) begin
         if (blank) begin
             red   <= palette_red;
             green <= palette_green;
             blue  <= palette_blue;
-        end else begin
+        end else begin //assigncolors based on VDE and pallete which we read out of
             red   <= 4'd0;
             green <= 4'd0;
             blue  <= 4'd0;
         end
-    end
+    end //otherwise set it all to blank 000 
 
     bg_rom bg_rom (
         .clka  (~vga_clk),

@@ -4,31 +4,29 @@ input logic reset,
 input logic move_enable,
 input logic [23:0] counter,
 output logic [9:0] ZapperX,
-output logic [9:0] ZapperY
-
+output logic [9:0] ZapperY,
+input logic in_game
 );
-localparam INIT_X = 10'd640;
-localparam MIN_Y = 10'd50;
-localparam MAX_Y = 10'd400;
-localparam BASE_SPEED = 10'd2;
 
 logic [9:0] speed;
-assign speed = BASE_SPEED + counter[22:20]; // Difficulty scaling
+assign speed = 10'd2 + counter[21:19]; 
 
-// Random Y generators
-logic [9:0] random_y = MIN_Y + (
-(counter[7:0] ^ counter[15:8] ^ counter[23:16]) % (MAX_Y - MIN_Y)
+  //we set the random y based on a specific counter
+logic [9:0] random_y = 10'd50 + (
+(counter[7:0] ^ counter[15:8] ^ counter[23:16]) % (10'd400 - 10'd50) //changed up the bits from the other zapper so that they are in diff
+//y positions over time
 );
 
-
+    //by taking random bits of the counter we are able to set it to a psuedo random value --searched up and then ad 50 since its out base value
+    //we are able to psuedorandom the y position of the coutner and it moves over time
 always_ff @(posedge clk or posedge reset) begin
-if (reset) begin
-ZapperX <= INIT_X;
-ZapperY <= MIN_Y;
+if (reset || in_game == 1'd0) begin
+ZapperX <= 10'd640;
+ZapperY <= 10'd50;
 
 end else if (move_enable) begin
-// Move Zapper1
-ZapperX <= (ZapperX > speed) ? (ZapperX - speed) : INIT_X;
+ZapperX <= (ZapperX > speed) ? (ZapperX - speed) : 10'd640;
+//same logic to move as before
 if (ZapperX <= speed)
 ZapperY <= random_y;
 

@@ -7,64 +7,45 @@ module ball (
     output logic [9:0]  BallS
 );
 
-    // === Parameters ===
-    parameter logic signed [9:0] Ball_X_Center  = 10'd260;
-    parameter logic signed [9:0] Ball_Y_Center  = 10'd16;
-    parameter logic signed [9:0] Ball_Y_Min     = 10'd8;
-    parameter logic signed  [9:0] Ball_Y_Max     = 10'd480 - 10'd57;
-    parameter logic signed  [9:0] Jetpack_Thrust = 10'd4;     // Reduced thrust for better control
-    parameter logic signed  [9:0] Ball_Size      = 10'd50;
-    parameter logic signed  [9:0] Max_Fall_Speed = 10'd6;
-    parameter logic signed  [9:0] Max_Rise_Speed = 10'd6;    // Matched rise/fall limits
-    
-    localparam logic [7:0] SPACEBAR = 8'h2C;          // Explicit spacebar code
-
-    // === Internal Signals ===
+   
     logic signed [10:0] Ball_Y_Motion;
-    logic               key_pressed;
 
-    // === Key Detection ===
-    assign key_pressed = (keycode == SPACEBAR);  // Direct spacebar detection
-
-    // === Physics and Position Update ===
     always_ff @(posedge frame_clk or posedge Reset) begin
         if (Reset) begin
-            BallY <= Ball_Y_Center;
-            BallX <= Ball_X_Center;
-            Ball_Y_Motion <= 11'sd0;
+            BallY <= 10'd16;
+            BallX <= 10'd260;
+            Ball_Y_Motion <= 11'sd0; //setting ball to inital positions on reset
         end else begin
-            // Apply forces
-            if (key_pressed) begin
-                Ball_Y_Motion <= Ball_Y_Motion - $signed(Jetpack_Thrust);
+            
+            if (keycode == 8'h2C) begin //if space then go up
+                Ball_Y_Motion <= Ball_Y_Motion - $signed(10'd4);
             end else begin
-                Ball_Y_Motion <= Ball_Y_Motion + 8'sd1;  // Gravity
+                Ball_Y_Motion <= Ball_Y_Motion + $signed(8'd1);  
+            end
+ //else go down ,gravity
+            if ($signed(Ball_Y_Motion) > $signed(10'd6)) begin
+                Ball_Y_Motion <= $signed(10'd6); //need everything to be signed 
+            end
+            else if ($signed(Ball_Y_Motion) < -$signed(10'd6)) begin
+                Ball_Y_Motion <= -$signed(10'd6);
+            end
+//unsighed values causing erros, max of 6 up and 6 down. we were able to add gravity
+            BallY <= BallY + Ball_Y_Motion;
+        //make ball y updatedwit ball with plu snew coords
+            
+            if (BallY > $signed(10'd480) - $signed(10'd57)) begin
+                BallY <= $signed(10'd480) - $signed(10'd57);
+                Ball_Y_Motion <= 11'd0;  
+            end
+            else if (BallY < $signed(10'd8)) begin
+                BallY <= $signed(10'd8);
+                Ball_Y_Motion <= 11'sd0;  
             end
 
-            // Velocity constraints (signed comparison)
-            if ($signed(Ball_Y_Motion) > $signed(Max_Fall_Speed)) begin
-                Ball_Y_Motion <= $signed(Max_Fall_Speed);
-            end
-            else if ($signed(Ball_Y_Motion) < -$signed(Max_Rise_Speed)) begin
-                Ball_Y_Motion <= -$signed(Max_Rise_Speed);
-            end
-
-            // Position update (using signed arithmetic)
-            BallY <= BallY + Ball_Y_Motion[9:0];
-
-            // Vertical bounds checking
-            if (BallY > Ball_Y_Max) begin
-                BallY <= Ball_Y_Max;
-                Ball_Y_Motion <= 11'sd0;  // Kill momentum on ground hit
-            end
-            else if (BallY < Ball_Y_Min) begin
-                BallY <= Ball_Y_Min;
-                Ball_Y_Motion <= 11'sd0;  // Prevent moving above ceiling
-            end
-
-            BallX <= Ball_X_Center;
+            BallX <= 10'd260;
         end
     end
-
-    assign BallS = Ball_Size;
+//same logc just resetting
+    assign BallS = 10'd50;
 
 endmodule

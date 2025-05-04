@@ -7,29 +7,24 @@ module zapper2_example (
 	output logic        zapper_on
 );
 
-	// Sprite size
-	localparam SPRITE_W = 70;
-	localparam SPRITE_H = 172;
-
 	logic signed [10:0] spritex, spritey;
 	
 	assign spritex = DrawX - ZapperX;
 	assign spritey = DrawY - ZapperY;
 
 	assign zapper_on = in_game &&
-	                   (spritex >= 0) && (spritex < SPRITE_W) &&
-	                   (spritey >= 0) && (spritey < SPRITE_H);
+	                   (spritex >= 0) && (spritex < 70) &&
+	                   (spritey >= 0) && (spritey < 172);
 
-    logic [13:0] rom_addr_r;
-    always_ff @(posedge vga_clk) begin
-      rom_addr_r <= zapper_on
-                   ? (spritex[9:0] + SPRITE_W * spritey[9:0])
-                   : 14'd0;
-    end
-    
+        logic [13:0] rom_addr_r;
+        //we get addr from pallet and check and assign values 
+        always_ff @(posedge vga_clk) begin
+          rom_addr_r <= zapper_on ? (spritex[9:0] + 70 * spritey[9:0]) : 14'd0; //condensed to one line so its faster appreantly????
+        end
+        
 	logic [2:0] rom_q;
 	logic [3:0] pal_r, pal_g, pal_b;
-
+//same logic as others to read from pallet
 	zapper2_rom zapper2_rom (
 		.clka   (vga_clk),
 		.addra  (rom_addr_r),
@@ -46,6 +41,7 @@ module zapper2_example (
 	always_ff @(posedge vga_clk) begin
 		if (zapper_on && |{pal_r, pal_g, pal_b}) begin
 			zap2r   <= pal_r;
+			//assign pallet colors
 			zap2g <= pal_g;
 			zap2b  <= pal_b;
 		end else begin
